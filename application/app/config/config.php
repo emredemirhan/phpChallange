@@ -13,7 +13,7 @@ return new \Phalcon\Config([
         'host'        => 'mysql',
         'username'    => 'root',
         'password'    => 'root',
-        'dbname'      => 'test',
+        'dbname'      => 'phalcon_app',
         'charset'     => 'utf8',
     ],
     'application' => [

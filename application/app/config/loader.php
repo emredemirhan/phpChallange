@@ -10,4 +10,12 @@ $loader->registerDirs(
         $config->application->controllersDir,
         $config->application->modelsDir
     ]
-)->register();
+);
+
+$loader->registerNamespaces(
+    [
+        require BASE_PATH . '/application/vendor/autoload.php',
+    ]
+);
+
+$loader->register();
