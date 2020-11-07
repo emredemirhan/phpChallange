@@ -86,7 +86,7 @@ class Users extends \Phalcon\Mvc\Model
             'email',
             new EmailValidator(
                 [
-                    'model'   => $this,
+                    'model' => $this,
                     'message' => 'Please enter a correct email address',
                 ]
             )
@@ -97,7 +97,7 @@ class Users extends \Phalcon\Mvc\Model
             new Uniqueness(
                 [
                     'model' => $this,
-                    'message' => 'The email address is already registered',
+                    'message' => 'This email address is already registered',
                 ]
             )
         );

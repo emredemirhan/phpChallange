@@ -35,15 +35,5 @@ class GiftCodes extends \Phalcon\Mvc\Model
         return parent::find($parameters);
     }
 
-    /**
-     * Allows to query the first record that match the specified conditions
-     *
-     * @param mixed $parameters
-     * @return GiftCodes|\Phalcon\Mvc\Model\ResultInterface
-     */
-    public static function findFirst($parameters = null): \Phalcon\Mvc\ModelInterface
-    {
-        return parent::findFirst($parameters);
-    }
 
 }

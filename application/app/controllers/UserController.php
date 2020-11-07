@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+declare (strict_types = 1);
 
 use Firebase\JWT\JWT;
 
@@ -20,84 +20,103 @@ class UserController extends ControllerBase
                     'city',
                     'timezone',
                     'language',
-                    'os'
+                    'os',
                 ]
             );
             $user->password = $this->security->hash($pass);
-            try{
+            try {
                 if (false === $user->save()) {
-                    $this->response->setStatusCode(409, "Validation Error")->sendHeaders();
                     $messages = $user->getMessages();
                     $m = "";
                     foreach ($messages as $message) {
-                        $m = $m.$message->getMessage();
+                        $m = $m . $message->getMessage();
                     }
-                    return array('message' => 'Error creating user: '.$m);
+                    return array('message' => 'Error creating user: ' . $m, 'StatusCode' => 409);
                 } else {
                     $this->response->setStatusCode(201, 'Created');
-                    return array('success' => true, 'message'=>'User created.');
+                    return array('message' => 'User created.');
                 }
-            }catch(PDOException $e){
-                return array('success'=>false,'message' => $e->getMessage(),'code' => $e->getCode());
+            } catch (PDOException $e) {
+                return array('message' => $e->getMessage(), 'code' => $e->getCode());
             }
-        }else{
-            return array("message" => "Only POST method is allowed");
+        } else {
+            return array("message" => "Only POST method is allowed","StatusCode" => 405);
         }
     }
 
-    public function loginAction(){
+    public function loginAction()
+    {
         if (true === $this->request->isPost()) {
-            $email    = $this->request->getPost("email");
+            $email = $this->request->getPost("email");
             $password = $this->request->getPost('password');
             $user = Users::findFirstByEmail($email);
 
             if ($user) {
                 if ($this->security->checkHash($password, $user->password)) {
-                    $key  = base64_decode('PHPChallengeAccepted');
+                    $key = base64_decode($this->config->jwt->key);
                     $time = time();
                     $expires = $time;
                     $token = [
-                        'iss' =>  $this->request->getURI(),
-                        'iat' =>  $time,
-                        'exp' =>  $expires + 86400,
-                        'data' =>[
+                        'iss' => $this->request->getURI(),
+                        'iat' => $time,
+                        'exp' => $expires + $this->config->jwt->expire,
+                        'data' => [
                             'id' => $user->id,
                             'email' => $user->email,
-                        ]
+                        ],
                     ];
                     $jwt = JWT::encode($token, $key);
 
-                    return array('success' => true, 'message' => 'Login is valid','token'=> $jwt);
-                }else{
+                    return array('message' => 'Login is valid', 'token' => $jwt);
+                } else {
                     return array('message' => 'Wrong username/password combination.');
                 }
-            }else{
+            } else {
                 return array('message' => 'Wrong username/password combination.');
-            } 
-        }else{
-            return array("message" => "Only POST method is allowed");
+            }
+        } else {
+            return array("message" => "Only POST method is allowed","StatusCode" => 405);
         }
     }
 
-    public function updateAction(){
-        $headRequest = $this->request->getHeaders();
-        $token = $headRequest['Token'];
-        if ($token) {
-            try {
-                $key  = base64_decode('PHPChallengeAccepted');
-                $decoded = JWT::decode($token, $key, array('HS256'));
-                return array('success' => true, 'data' => $decoded);
+    public function updateAction()
+    {
+        return array('data' => $this->user);
+    }
+
+    public function activateGiftAction()
+    {
+        if (true === $this->request->isPost()) {
+            $giftCode = $this->request->getPost('giftCode');
+            if (!$giftCode) {
+                return array('message' => "Gift code cannot be empty", 'StatusCode' => 400);
+            } else {
+                $validCode = GiftCodes::findFirst(
+                    [
+                        'conditions' => 'code = :code: AND used = 0',
+                        'bind' => [
+                            'code' => $giftCode,
+                        ],
+                    ]
+                );
+                if (!$validCode) {
+                    return array('message' => "Gift code is not valid or already used.", 'StatusCode' => 400);
+                } else {
+                    $user = Users::findFirstByEmail($this->user->data->email);
+                    if ($user->subscription == "free") {
+                        return array('message' => "You already used a gift code for your account.");
+                    } else {
+                        $validCode->used = 1;
+                        $validCode->update();
+                        $user->subscription = "free";
+                        $user->update();
+                        return array('message' => "Gift code accepted. Your account's (" . $user->email . ") subscription type changed from paid to free");
+                    }
+                }
             }
-            catch (Exception $e)
-            {
-                $this->response->setStatusCode(401, "Unauthorized")->sendHeaders();
-                return array('message' => 'Access is denied' , 'error' => $e->getMessage());
-            }
-        }else{
-            $this->response->setStatusCode(401, "Unauthorized")->sendHeaders();
-            return array("message" => "Access is denied");
-        } 
+        } else {
+            return array("message" => "Only POST method is allowed","StatusCode" => 405);
+        }
     }
 
 }
-

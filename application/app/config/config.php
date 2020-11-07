@@ -26,5 +26,9 @@ return new \Phalcon\Config([
         'libraryDir'     => APP_PATH . '/library/',
         'cacheDir'       => BASE_PATH . '/cache/',
         'baseUri'        => '/',
+    ],
+    'jwt' => [
+        'key' => 'PHPChallengeAccepted',
+        'expire' => 86400
     ]
 ]);
