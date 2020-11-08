@@ -35,15 +35,5 @@ class Languages extends \Phalcon\Mvc\Model
         return parent::find($parameters);
     }
 
-    /**
-     * Allows to query the first record that match the specified conditions
-     *
-     * @param mixed $parameters
-     * @return Languages|\Phalcon\Mvc\Model\ResultInterface
-     */
-    public static function findFirst($parameters = null)
-    {
-        return parent::findFirst($parameters);
-    }
 
 }

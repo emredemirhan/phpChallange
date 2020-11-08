@@ -40,7 +40,7 @@ class UserController extends ControllerBase
                 return array('message' => $e->getMessage(), 'code' => $e->getCode());
             }
         } else {
-            return array("message" => "Only POST method is allowed","StatusCode" => 405);
+            return array("message" => "Only POST method is allowed", "StatusCode" => 405);
         }
     }
 
@@ -67,21 +67,44 @@ class UserController extends ControllerBase
                     ];
                     $jwt = JWT::encode($token, $key);
 
-                    return array('message' => 'Login is valid', 'token' => $jwt);
+                    return array('message' => 'Login successful. Token is valid for ' . $this->config->jwt->expire . " seconds.", 'token' => $jwt);
                 } else {
-                    return array('message' => 'Wrong username/password combination.');
+                    return array('message' => 'Wrong username/password combination.', "StatusCode" => 401);
                 }
             } else {
-                return array('message' => 'Wrong username/password combination.');
+                return array('message' => 'Wrong username/password combination.', "StatusCode" => 401);
             }
         } else {
-            return array("message" => "Only POST method is allowed","StatusCode" => 405);
+            return array("message" => "Only POST method is allowed", "StatusCode" => 405);
         }
     }
 
     public function updateAction()
     {
-        return array('data' => $this->user);
+        if (true === $this->request->isPost()) {
+            $user = Users::findFirst(array('id' => $this->user->data->id));
+            $pass = $this->request->getPost('password');
+            $user->assign(
+                $_POST,
+                [
+                    'email',
+                    'password',
+                    'phone',
+                    'city',
+                    'timezone',
+                    'language',
+                    'os',
+                ]
+            );
+            $user->password = $this->security->hash($pass);
+            if (!$user->save()) {
+                return array('error' => $user->getMessages());
+            } else {
+                return array('message' => "Profile has been updated successfully");
+            }
+        } else {
+            return array("message" => "Only POST method is allowed", "StatusCode" => 405);
+        }
     }
 
     public function activateGiftAction()
@@ -115,8 +138,79 @@ class UserController extends ControllerBase
                 }
             }
         } else {
-            return array("message" => "Only POST method is allowed","StatusCode" => 405);
+            return array("message" => "Only POST method is allowed", "StatusCode" => 405);
         }
     }
 
+    public function getCitiesAction()
+    {
+        $cities = new Cities();
+        $city_list = $cities->find(array('columns' => 'id, city'));
+        if (count($city_list) == 0) {
+            return array('message' => 'No cities found in the database', "StatusCode" => 404);
+        } else {
+            return array('data' => $city_list);
+        }
+    }
+
+    public function addCityToProfileAction($city_id = null)
+    {
+        if ($city_id) {
+            $user = Users::findFirstByEmail($this->user->data->email);
+            $ifExist = UserWeatherList::find(
+                [
+                    'conditions' => 'user_id = :user_id: and city = :city:',
+                    'bind' => [
+                        'user_id' => $user->id,
+                        'city' => $city_id,
+                    ],
+                ]
+            );
+            if (count($ifExist) == 0) {
+                try {
+                    $city = Cities::findFirstById($city_id);
+                    $newCity = new UserWeatherList();
+                    $newCity->city = $city_id;
+                    $newCity->user_id = $user->id;
+                    $newCity->save();
+                    return array('message' => $city->city . " city has been added to your profile successfully.");
+                } catch (Exception $e) {
+                    return array('error' => $e->getMessage());
+                }
+            } else {
+                return array('error' => "This city is already added to your profile.", 'StatusCode' => 400);
+            }
+        } else {
+            return array('error' => 'You must specify a city id value.', 'StatusCode' => 400);
+        }
+    }
+
+    public function removeCityFromProfileAction($city_id = null)
+    {
+        if ($city_id) {
+            $user = Users::findFirstByEmail($this->user->data->email);
+            $ifExist = UserWeatherList::findFirst(
+                [
+                    'conditions' => 'user_id = :user_id: and city = :city:',
+                    'bind' => [
+                        'user_id' => $user->id,
+                        'city' => $city_id,
+                    ],
+                ]
+            );
+            if (!$ifExist) {
+                return array('error' => "This city does not exist in your profile.");
+            } else {
+                try {
+                    $city = Cities::findFirstById($city_id);
+                    $ifExist->delete();
+                    return array('message' => $city->city . " city has been removed from your profile successfully.");
+                } catch (Exception $e) {
+                    return array('error' => $e->getMessage());
+                }
+            }
+        } else {
+            return array('error' => 'You must specify a city id value.');
+        }
+    }
 }

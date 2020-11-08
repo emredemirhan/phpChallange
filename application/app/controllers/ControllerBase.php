@@ -12,7 +12,7 @@ class ControllerBase extends Controller
     {
         $this->view->disable();
         $this->response->setContentType('application/json', 'UTF-8');
-        $protectedActions = array('update','activateGift');
+        $protectedActions = array('update', 'activateGift', 'addCityToProfile', 'removeCityFromProfile');
         if (in_array($dispatcher->getActionName(), $protectedActions)) {
             $headRequest = $this->request->getHeaders();
             $token = $headRequest['Token'];
@@ -22,8 +22,10 @@ class ControllerBase extends Controller
                     $decoded = JWT::decode($token, $key, array('HS256'));
                     $this->user = $decoded;
                 } catch (Exception $e) {
-                    $this->jsonResponse(array('message' => 'Access is denied', 'error' => $e->getMessage(), 'StatusCode' => 401));
-					$this->response->send();
+                    $this->jsonResponse(
+                        array('message' => 'Access is denied', 'error' => $e->getMessage(), 'StatusCode' => 401)
+                    );
+                    $this->response->send();
                     return false;
                 }
             } else {
@@ -45,7 +47,10 @@ class ControllerBase extends Controller
     {
         if (is_array($data)) {
             if (isset($data['StatusCode'])) {
-                $this->response->setStatusCode($data['StatusCode'], $this->getResponseDescription($data['StatusCode']))->sendHeaders();
+                $this->response->setStatusCode(
+                    $data['StatusCode'],
+                    $this->getResponseDescription($data['StatusCode'])
+                )->sendHeaders();
             }
             $data = json_encode($data);
             $this->response->setContent($data);

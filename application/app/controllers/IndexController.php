@@ -6,9 +6,7 @@ class IndexController extends ControllerBase
 
     public function indexAction()
     {
-         $gifts = new GiftCodes();
-        $result = $gifts->find();
-        return array('data'=> $result); 
+        return array('message' => "Welcome to PHPChallenge app API. You can use specified end-points in the API documentation.");
     }
 
 }
