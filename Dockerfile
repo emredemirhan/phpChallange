@@ -4,14 +4,6 @@ ARG PSR_VERSION=1.0.0
 ARG PHALCON_VERSION=4.1.0
 ARG PHALCON_EXT_PATH=php7/64bits
 
-RUN apt-get update && apt-get -y install cron
-
-COPY task-cron /etc/cron.d/task-cron
-RUN chmod 0644 /etc/cron.d/task-cron
-RUN crontab /etc/cron.d/task-cron
-RUN touch /var/log/cron.log
-
-CMD cron && tail -f /var/log/cron.log
 
 RUN set -xe && \
     # Download PSR, see https://github.com/jbboehr/php-psr
@@ -34,3 +26,9 @@ RUN set -xe && \
     php -m
 
 ENV WEB_DOCUMENT_ROOT=/var/www/html/application
+
+RUN mkdir /app1 && echo 'php /var/www/html/application/cli.php mail' > /app1/test.sh && chmod +x /app1/test.sh
+RUN mkdir /app2 && echo 'php /var/www/html/application/cli.php notification' > /app2/test.sh && chmod +x /app2/test.sh
+
+RUN echo "*/30 * * * * root /app1/test.sh > /proc/1/fd/1 2>/proc/1/fd/2" >> /etc/crontab
+RUN echo "*/30 * * * * root /app2/test.sh > /proc/1/fd/1 2>/proc/1/fd/2" >> /etc/crontab

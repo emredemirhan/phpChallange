@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+declare (strict_types = 1);
 
 use Phalcon\Di\FactoryDefault;
 
@@ -42,6 +42,10 @@ try {
 
     echo $application->handle($_SERVER['REQUEST_URI'])->getContent();
 } catch (\Exception $e) {
-    echo $e->getMessage() . '<br>';
-    echo '<pre>' . $e->getTraceAsString() . '</pre>';
+    if ($e->getCode() == 2) {
+        echo "Endpoint not found. Please look at API documentation.";
+    } else {
+        echo $e->getMessage() . '<br>';
+        echo '<pre>' . $e->getTraceAsString() . '</pre>';
+    }
 }

@@ -8,9 +8,9 @@ services:
     volumes:
       - ./:/var/www/html
     ports:
-      - '8080:80'
+      - '81:80'
     expose:
-      - '8080'
+      - '81'
     depends_on:
       - mysql
     links:
