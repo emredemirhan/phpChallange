@@ -3,7 +3,7 @@
 
 PHP Challange App is a REST API which allows users to get weather information via e-mail and notifications for various cities that user adds to its profile. Users can also activate gift codes for a free subscription plan.
 
-## Technologies used
+## Tech/Framework used
 
 Docker image based on:
 

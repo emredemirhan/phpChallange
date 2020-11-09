@@ -2,6 +2,7 @@
 declare (strict_types = 1);
 
 use Firebase\JWT\JWT;
+use Phalcon\Mvc\Model\Query\Builder;
 
 class UserController extends ControllerBase
 {
@@ -144,12 +145,38 @@ class UserController extends ControllerBase
 
     public function getCitiesAction()
     {
-        $cities = new Cities();
-        $city_list = $cities->find(array('columns' => 'id, city'));
-        if (count($city_list) == 0) {
-            return array('message' => 'No cities found in the database', "StatusCode" => 404);
+        try {
+            $cities = new Cities();
+            $city_list = $cities->find(array('columns' => 'id, city'));
+            if (count($city_list) == 0) {
+                return array('message' => 'No cities found in the database', "StatusCode" => 404);
+            } else {
+                return array('data' => $city_list);
+            }
+        } catch (Exception $e) {
+            return array('message' => $e->getMessage(), 'code' => $e->getCode());
+        }
+    }
+
+    public function getLanguagesAction()
+    {
+        $langs = new Languages();
+        $lang_list = $langs->find();
+        if (count($lang_list) == 0) {
+            return array('message' => 'No languages found in the database', "StatusCode" => 404);
         } else {
-            return array('data' => $city_list);
+            return array('data' => $lang_list);
+        }
+    }
+
+    public function getTimezonesAction()
+    {
+        $times = new Timezones();
+        $times_list = $times->find(array('columns' => 'id,timezone'));
+        if (count($times_list) == 0) {
+            return array('message' => 'No timezone is found in the database', "StatusCode" => 404);
+        } else {
+            return array('data' => $times_list);
         }
     }
 
@@ -213,4 +240,5 @@ class UserController extends ControllerBase
             return array('error' => 'You must specify a city id value.');
         }
     }
+
 }
