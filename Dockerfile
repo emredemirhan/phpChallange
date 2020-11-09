@@ -4,6 +4,15 @@ ARG PSR_VERSION=1.0.0
 ARG PHALCON_VERSION=4.1.0
 ARG PHALCON_EXT_PATH=php7/64bits
 
+RUN apt-get update && apt-get -y install cron
+
+COPY task-cron /etc/cron.d/task-cron
+RUN chmod 0644 /etc/cron.d/task-cron
+RUN crontab /etc/cron.d/task-cron
+RUN touch /var/log/cron.log
+
+CMD cron && tail -f /var/log/cron.log
+
 RUN set -xe && \
     # Download PSR, see https://github.com/jbboehr/php-psr
     curl -LO https://github.com/jbboehr/php-psr/archive/v${PSR_VERSION}.tar.gz && \
