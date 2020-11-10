@@ -2,7 +2,6 @@
 declare (strict_types = 1);
 
 use Firebase\JWT\JWT;
-use Phalcon\Mvc\Model\Query\Builder;
 
 class UserController extends ControllerBase
 {
@@ -24,7 +23,9 @@ class UserController extends ControllerBase
                     'os',
                 ]
             );
+            $random = new \Phalcon\Security\Random();
             $user->password = $this->security->hash($pass);
+            $user->tokennot = $random->hex(13);
             try {
                 if (false === $user->save()) {
                     $messages = $user->getMessages();
@@ -80,7 +81,7 @@ class UserController extends ControllerBase
         }
     }
 
-    public function updateAction()
+    public function updateProfileAction()
     {
         if (true === $this->request->isPost()) {
             $user = Users::findFirst(array('id' => $this->user->data->id));
@@ -97,7 +98,31 @@ class UserController extends ControllerBase
                     'os',
                 ]
             );
-            $user->password = $this->security->hash($pass);
+
+            $allowedFileFormats = array(
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
+            );
+
+            if ($this->request->hasFiles()) {
+                $files = $this->request->getUploadedFiles();
+                foreach ($files as $file) {
+                    if ($file->getKey() == "profile_photo") {
+                        if (array_key_exists($file->getRealType(), $allowedFileFormats)) {
+                            if ($file->getSize() > 512000) {
+                                return array("error" => "This file size for profile photo exceeds maximum value. It should be smaller than 512KB.", "StatusCode" => 400);
+                            } else {
+                                $user->profile_photo = base64_encode(file_get_contents($file->getTempName()));
+                            }
+                        } else {
+                            return array("error" => "This file type for profile photo is not supported. Consider using jpeg or png", "StatusCode" => 400);
+                        }
+                    }
+                }
+            }
+            if ($pass) {
+                $user->password = $this->security->hash($pass);
+            }
             if (!$user->save()) {
                 return array('error' => $user->getMessages());
             } else {
@@ -238,6 +263,22 @@ class UserController extends ControllerBase
             }
         } else {
             return array('error' => 'You must specify a city id value.');
+        }
+    }
+
+    #This function should only be used in an empty table to populate weather information in the database.
+    public function populateWeatherAction()
+    {
+        $a = 0;
+        for ($i = 1; $i < 201; $i++) {
+            if ($i % 10 == 0) {$a++;}
+            $city = $i % 10;
+            if ($city == 0) {$city = 10;}
+            $temp = rand(100, 300) / 10;
+            $startDate = time();
+            $theDate = date('Y-m-d', strtotime('+' . $a . ' day', $startDate));
+            $query = $this->modelsManager->createQuery("INSERT into WeatherList(date,temperature,city) values('" . $theDate . "','" . $temp . "','" . $city . "' )");
+            $query->execute();
         }
     }
 

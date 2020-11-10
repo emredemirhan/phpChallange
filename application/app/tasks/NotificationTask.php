@@ -11,7 +11,9 @@ class NotificationTask extends Phalcon\CLI\Task
         $users = new Builder();
         $users
         ->columns([
-            "Users.token_notification",
+            "Users.id",
+            "Users.tokennot",
+            "Users.email",
             "Timezones.value",
             "currentTime" => "date_format(CONVERT_TZ(now(), 'GMT', Timezones.value),'%H:%i')"
         ])
@@ -25,12 +27,16 @@ class NotificationTask extends Phalcon\CLI\Task
        )*/
        $userList = $users->getQuery()->execute();
        forEach($userList as $user){
-            $this->sendNotification($user->token_notification);
+            $this->sendNotification($user->tokennot,$user->email,MailTask::getWeathers($user->id));
        }
     }
 
-    private function sendNotification($not){
-        echo "Notification has been sent to : ".$not."\n";
+    private function sendNotification($not,$email,$message){
+        echo "Notification has been sent to : ".$not."(".$email.")\n";
+        foreach ($message as $m) {
+            echo "City : " . $m->city . " | Temperature : " . $m->temperature."\n";
+        }
     }
+    
 
 }

@@ -65,7 +65,7 @@ class Users extends \Phalcon\Mvc\Model
      *
      * @var string
      */
-    public $not_token;
+    public $tokennot;
 
     /**
      *

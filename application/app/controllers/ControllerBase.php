@@ -12,7 +12,7 @@ class ControllerBase extends Controller
     {
         $this->view->disable();
         $this->response->setContentType('application/json', 'UTF-8');
-        $protectedActions = array('update', 'activateGift', 'addCityToProfile', 'removeCityFromProfile');
+        $protectedActions = array('updateProfile', 'activateGift', 'addCityToProfile', 'removeCityFromProfile');
         if (in_array($dispatcher->getActionName(), $protectedActions)) {
             $headRequest = $this->request->getHeaders();
             $token = $headRequest['Token'];

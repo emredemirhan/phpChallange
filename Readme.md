@@ -8,6 +8,7 @@ PHP Challange App is a REST API which allows users to get weather information vi
 Docker image based on:
 
 Phalcon 4.1.0
+
 webdevops/php-nginx:7.2
 
 Authentication is based on :
@@ -28,7 +29,7 @@ After this command is executed you can reach this api on http://localhost:8080
 
 ### Initial Configuration
 
-You can configure server ports, mysql database name and database password through docker-compose.yml file. Make sure to make the necessary changes in application\app\config\config.php file as well.
+You can configure server ports, mysql database name and database password through docker-compose.yml file. Make sure to make the necessary changes in application\app\config\config.php file as well. 
 You can also change JWT token's key and it's expire time in application\app\config\config.php
 
 ## Features
