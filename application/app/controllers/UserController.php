@@ -185,23 +185,31 @@ class UserController extends ControllerBase
 
     public function getLanguagesAction()
     {
-        $langs = new Languages();
-        $lang_list = $langs->find();
-        if (count($lang_list) == 0) {
-            return array('message' => 'No languages found in the database', "StatusCode" => 404);
-        } else {
-            return array('data' => $lang_list);
+        try {
+            $langs = new Languages();
+            $lang_list = $langs->find();
+            if (count($lang_list) == 0) {
+                return array('message' => 'No languages found in the database', "StatusCode" => 404);
+            } else {
+                return array('data' => $lang_list);
+            }
+        } catch (Exception $e) {
+            return array('message' => $e->getMessage(), 'code' => $e->getCode());
         }
     }
 
     public function getTimezonesAction()
     {
-        $times = new Timezones();
-        $times_list = $times->find(array('columns' => 'id,timezone'));
-        if (count($times_list) == 0) {
-            return array('message' => 'No timezone is found in the database', "StatusCode" => 404);
-        } else {
-            return array('data' => $times_list);
+        try {
+            $times = new Timezones();
+            $times_list = $times->find(array('columns' => 'id,timezone'));
+            if (count($times_list) == 0) {
+                return array('message' => 'No timezone is found in the database', "StatusCode" => 404);
+            } else {
+                return array('data' => $times_list);
+            }
+        } catch (Exception $e) {
+            return array('message' => $e->getMessage(), 'code' => $e->getCode());
         }
     }
 

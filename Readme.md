@@ -9,7 +9,9 @@ Docker image based on:
 
 Phalcon 4.1.0
 
-webdevops/php-nginx:7.2
+Webdevops/php-nginx:7.2
+
+Mysql 8
 
 Authentication is based on :
 
@@ -26,6 +28,8 @@ in the root directory.
 
 When you execute this command, two containers are created. One is for php-nginx server other is for mysql database server. 
 After this command is executed you can reach this api on http://localhost:8080
+
+Initial database structure is located at db folder. When docker image is created, any sql file in this directory will be executed for once. So you don't have to run any extra command to initialize database. 
 
 ### Initial Configuration
 
@@ -44,10 +48,15 @@ These are the sections that you can reach via this API :
 * Adding cities to profile 
 * Removing cities from profile
 * Activating gift codes
+* Listing languages
+* Listing time zones
 
 API responses are in application/json format. 
 
 You can reach to the API documentation here https://documenter.getpostman.com/view/13394179/TVeiDBAp#phpchallenge-api-collection
+
+Also there are 2 tasks which will run every 30 minute to send weather information to users via email and notification. It will be sent on user's local time at 9:00 AM. These tasks are created during docker image creation.
+You can change interval parameters in Dockerfile.
 
 ## Licensing
 
